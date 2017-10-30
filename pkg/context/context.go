@@ -1,11 +1,14 @@
 package context
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/upfluence/pkg/log"
 	"gopkg.in/src-d/go-git.v4"
 )
+
+var versionRegexp = regexp.MustCompile("^v\\d.\\d.\\d(-.+)?$")
 
 type Context struct {
 	Dist    bool
@@ -16,8 +19,8 @@ type Version struct {
 	Semver, Commit, Branch, Remote string
 }
 
-func buildVersion(path, ver string) *Version {
-	r, err := git.PlainOpen(path)
+func buildVersion(path string) *Version {
+	var r, err = git.PlainOpen(path)
 
 	if err != nil {
 		log.Fatalf("git: %s", err.Error())
@@ -38,17 +41,12 @@ func buildVersion(path, ver string) *Version {
 	refName := strings.Split(string(ref.Name()), "/")
 
 	return &Version{
-		Semver: ver,
-		Commit: ref.Hash().String()[:7],
+		Commit: ref.Hash().String(),
 		Branch: refName[len(refName)-1],
 		Remote: remote.Config().URLs[0],
 	}
 }
 
-func BuildLocalContext(path string) *Context {
-	return &Context{Dist: false, Version: buildVersion(path, "v0.0.0-dirtry")}
-}
-
-func BuildDistContext(path, ver string) *Context {
-	return &Context{Dist: true, Version: buildVersion(path, ver)}
+func BuildContext(path string, dist bool) *Context {
+	return &Context{Dist: dist, Version: buildVersion(path)}
 }

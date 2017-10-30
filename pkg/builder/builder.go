@@ -44,7 +44,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		args,
 		"--no-cache",
 		"-t",
-		cfg.GetBuilder().GetImage()+":"+ctx.Version.Commit,
+		cfg.GetBuilder().GetImage()+":"+ctx.Version.Commit[:7],
 		cfg.GetPath(),
 	)
 
@@ -56,12 +56,12 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		return err
 	}
 
-	if err := tagImage(cfg, ctx.Version.Commit, ctx.Version.Semver); err != nil {
+	if err := tagImage(cfg, ctx.Version.Commit[:7], ctx.Version.Semver); err != nil {
 		return err
 	}
 
 	if t, ok := cfg.GetBuilder().Tags[ctx.Version.Branch]; ok {
-		if err := tagImage(cfg, ctx.Version.Commit, t); err != nil {
+		if err := tagImage(cfg, ctx.Version.Commit[:7], t); err != nil {
 			return err
 		}
 	}
@@ -81,7 +81,7 @@ func buildArgs(ctx *context.Context) []string {
 		"GIT_BRANCH":     ctx.Version.Branch,
 		"GIT_COMMIT":     ctx.Version.Commit,
 		"GIT_REMOTE":     ctx.Version.Remote,
-		"SEMBER_VERSION": ctx.Version.Semver,
+		"SEMVER_VERSION": ctx.Version.Semver,
 	} {
 		res = append(res, "--build-arg", fmt.Sprintf("%s=%s", k, v))
 	}
