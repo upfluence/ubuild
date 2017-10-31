@@ -20,6 +20,11 @@ const (
 	defaultDist = "dist"
 )
 
+var defaultTags = map[string]string{
+	"master":  "latest",
+	"staging": "staging",
+}
+
 type Configuration struct {
 	Verbose bool      `yaml:"verbose"`
 	Type    BuildType `yaml:"type"`
@@ -123,6 +128,14 @@ type Docker struct {
 	Dockerfile string            `yaml:"dockerfile"`
 	Image      string            `yaml:"image"`
 	Tags       map[string]string `yaml:"tags"`
+}
+
+func (d Docker) GetTag(branch string) string {
+	if t, ok := d.Tags[branch]; ok {
+		return t
+	}
+
+	return defaultTags[branch]
 }
 
 func (d Docker) GetDockerfile() string {

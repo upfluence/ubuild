@@ -60,7 +60,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		return err
 	}
 
-	if t, ok := cfg.GetBuilder().Tags[ctx.Version.Branch]; ok {
+	if t := cfg.GetBuilder().GetTag(ctx.Version.Branch); t != "" {
 		if err := tagImage(cfg, ctx.Version.Commit[:7], t); err != nil {
 			return err
 		}
