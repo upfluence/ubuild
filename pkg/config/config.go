@@ -39,8 +39,8 @@ func (c Configuration) GetRepo() string {
 	}
 
 	for _, path := range append(
-		strings.Split(os.Getenv("GOPATH"), ","),
-		strings.Split(os.Getenv("GOROOT"), ",")...,
+		strings.Split(os.Getenv("GOPATH"), ":"),
+		strings.Split(os.Getenv("GOROOT"), ":")...,
 	) {
 		dir = strings.TrimPrefix(dir, path+"/src/")
 	}
