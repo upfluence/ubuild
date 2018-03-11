@@ -10,7 +10,7 @@ import (
 	"github.com/upfluence/ubuild/pkg/sh"
 )
 
-const handlerPkg = "github.com/upfluence/pkg/thrift/handler"
+const handlerPkg = "github.com/upfluence/pkg/peer"
 
 func Compile(ctx *context.Context, cfg *config.Configuration) error {
 	if err := os.MkdirAll(
