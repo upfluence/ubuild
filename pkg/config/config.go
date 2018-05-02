@@ -26,8 +26,9 @@ var defaultTags = map[string]string{
 }
 
 type Configuration struct {
-	Verbose bool      `yaml:"verbose"`
-	Type    BuildType `yaml:"type"`
+	Verbose    bool      `yaml:"verbose"`
+	Type       BuildType `yaml:"type"`
+	Repository string    `yaml:"repository,omitempty"`
 
 	Compiler *Compiler `yaml:"compiler,omitempty"`
 
@@ -35,6 +36,10 @@ type Configuration struct {
 }
 
 func (c Configuration) GetRepo() string {
+	if r := c.Repository; r != "" {
+		return r
+	}
+
 	dir, err := os.Getwd()
 
 	if err != nil {
