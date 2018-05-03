@@ -49,7 +49,7 @@ func (v *Version) IncRC() {
 		v.IncPatch()
 	}
 
-	v.SetMetadata(fmt.Sprintf("rc%d", v.RC()+1))
+	v.Version, _ = v.SetPrerelease(fmt.Sprintf("rc%d", v.RC()+1))
 }
 
 func IncrementVersionFromCommits(v *Version, messages []string) bool {
