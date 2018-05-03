@@ -75,7 +75,7 @@ func CreateRelease(repo string, sha string, v *version.Version) error {
 		return err
 	}
 
-	pre := v.RC() > 0
+	pre := false
 
 	_, _, err := buildClient().Repositories.CreateRelease(
 		context.Background(),
