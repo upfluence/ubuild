@@ -14,16 +14,24 @@ import (
 type BuildType string
 
 const (
-	Go   BuildType = "go"
-	Ruby BuildType = "rb"
+	Go       BuildType = "go"
+	Ruby     BuildType = "rb"
+	Frontend BuildType = "frontend"
 
 	defaultDist = "dist"
 )
 
-var defaultTags = map[string]string{
-	"master":  "latest",
-	"staging": "staging",
-}
+var (
+	defaultTags = map[string]string{
+		"master":  "latest",
+		"staging": "staging",
+	}
+
+	defaultEnvs = map[string]string{
+		"master":  "production",
+		"staging": "staging",
+	}
+)
 
 type Configuration struct {
 	Verbose    bool      `yaml:"verbose"`
@@ -32,7 +40,8 @@ type Configuration struct {
 
 	Compiler *Compiler `yaml:"compiler,omitempty"`
 
-	Docker *Docker `yaml:"docker,omitempty"`
+	Docker   *Docker   `yaml:"docker,omitempty"`
+	Deployer *Deployer `yaml:"deployer,omitempty"`
 }
 
 func (c Configuration) GetRepo() string {
@@ -91,6 +100,14 @@ func (c Configuration) GetBuilder() Docker {
 	}
 
 	return Docker{}
+}
+
+func (c Configuration) GetDeployer() Deployer {
+	if c.Deployer != nil {
+		return *c.Deployer
+	}
+
+	return Deployer{}
 }
 
 type Binary struct {
@@ -161,6 +178,19 @@ func (d Docker) GetImage() string {
 	}
 
 	return fmt.Sprintf("upfluence/%s", d.Image)
+}
+
+type Deployer struct {
+	URL  string            `yaml:"url"`
+	Envs map[string]string `yaml:"envs"`
+}
+
+func (d Deployer) GetEnv(branch string) string {
+	if t, ok := d.Envs[branch]; ok {
+		return t
+	}
+
+	return defaultEnvs[branch]
 }
 
 func ParseFile(path string) (*Configuration, error) {

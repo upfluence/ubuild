@@ -14,7 +14,7 @@ func Compile(ctx *context.Context, cfg *config.Configuration) error {
 	switch cfg.Type {
 	case config.Go:
 		return golang.Compile(ctx, cfg)
-	case config.Ruby:
+	case config.Ruby, config.Frontend:
 		return nil
 	}
 
