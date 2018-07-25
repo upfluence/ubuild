@@ -13,7 +13,7 @@ var errNotImplemented = errors.New("builder: Builder not implemented")
 
 func Build(ctx *context.Context, cfg *config.Configuration) error {
 	switch cfg.Type {
-	case config.Go, config.Ruby:
+	case config.Go, config.Ruby, config.Python:
 		return docker.Build(ctx, cfg)
 	case config.Frontend:
 		return frontenddeployer.Build(ctx, cfg)

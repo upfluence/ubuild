@@ -17,6 +17,7 @@ const (
 	Go       BuildType = "go"
 	Ruby     BuildType = "rb"
 	Frontend BuildType = "frontend"
+	Python 	 BuildType = "py"
 
 	defaultDist = "dist"
 )
