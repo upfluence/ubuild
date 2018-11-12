@@ -135,9 +135,10 @@ func (b Binary) GetName() string {
 }
 
 type Compiler struct {
-	Binaries []Binary `yaml:"binaries"`
-	Dist     string   `yaml:"dist"`
-	CGO      string   `yaml:"cgo"`
+	Binaries []Binary          `yaml:"binaries"`
+	Dist     string            `yaml:"dist"`
+	CGO      string            `yaml:"cgo"`
+	Args     map[string]string `yaml:"args"`
 }
 
 func (c Compiler) GetCGO() string {

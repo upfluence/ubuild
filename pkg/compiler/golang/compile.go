@@ -56,17 +56,32 @@ func buildCommand(ctx *context.Context, binary config.Binary, cfg *config.Config
 		ldFlagFunc("Version", ctx.Version.Semver),
 	}
 
-	return []string{
-		"go",
-		"build",
-		"-installsuffix",
-		"netgo",
-		"-installsuffix",
-		"cgo",
-		"-ldflags",
-		strings.Join(ldFlags, " "),
+	var extraArgs []string
+
+	for k, v := range cfg.GetCompiler().Args {
+		extraArgs = append(
+			extraArgs,
+			"-"+k,
+			v,
+		)
+	}
+
+	return append(
+		append(
+			[]string{
+				"go",
+				"build",
+				"-installsuffix",
+				"netgo",
+				"-installsuffix",
+				"cgo",
+				"-ldflags",
+				strings.Join(ldFlags, " "),
+			},
+			extraArgs...,
+		),
 		"-o",
 		fmt.Sprintf("%s/%s", cfg.GetCompiler().GetDist(), binary.GetName()),
 		fmt.Sprintf("%s/%s", cfg.GetRepo(), binary.GetPath()),
-	}
+	)
 }
