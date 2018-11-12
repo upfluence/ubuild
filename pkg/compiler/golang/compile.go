@@ -22,7 +22,7 @@ func Compile(ctx *context.Context, cfg *config.Configuration) error {
 
 	if ctx.Dist {
 		for k, v := range map[string]string{
-			"CGO_ENABLED": "0",
+			"CGO_ENABLED": cfg.GetCompiler().GetCGO(),
 			"GOOS":        "linux",
 			"GOARCH":      "amd64",
 		} {

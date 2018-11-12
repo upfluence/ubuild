@@ -17,7 +17,7 @@ const (
 	Go       BuildType = "go"
 	Ruby     BuildType = "rb"
 	Frontend BuildType = "frontend"
-	Python 	 BuildType = "py"
+	Python   BuildType = "py"
 
 	defaultDist = "dist"
 )
@@ -137,6 +137,15 @@ func (b Binary) GetName() string {
 type Compiler struct {
 	Binaries []Binary `yaml:"binaries"`
 	Dist     string   `yaml:"dist"`
+	CGO      string   `yaml:"cgo"`
+}
+
+func (c Compiler) GetCGO() string {
+	if c.CGO == "" {
+		return "0"
+	}
+
+	return c.CGO
 }
 
 func (c Compiler) GetDist() string {
