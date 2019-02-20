@@ -29,3 +29,35 @@ func TestIncRC(t *testing.T) {
 		}
 	}
 }
+
+func TestCompare(t *testing.T) {
+	for _, tCase := range []struct {
+		from string
+		to   string
+		out  int
+	}{
+		{from: "v0.0.0", to: "v0.0.0-rc1", out: 1},
+		{from: "v1.0.0", to: "v1.0.1-rc1", out: -1},
+		{from: "v1.0.1-rc2", to: "v1.0.1-rc1", out: 1},
+		{from: "v1.0.1-rc1", to: "v1.0.1-rc2", out: -1},
+		{from: "v1.0.0", to: "v1.0.0", out: 0},
+	} {
+		from, errf := semver.NewVersion(tCase.from)
+		to, errt := semver.NewVersion(tCase.to)
+
+		if errf != nil {
+			t.Errorf("Can't parse: %v: %v", tCase.from, errf)
+		}
+
+		if errt != nil {
+			t.Errorf("Can't parse: %v: %v", tCase.to, errt)
+		}
+
+		r := &Version{Version: *from}
+		vt := &Version{Version: *to}
+
+		if res := r.Compare(vt); res != tCase.out {
+			t.Errorf("Wrong compare: %v instead of: %v", res, tCase.out)
+		}
+	}
+}

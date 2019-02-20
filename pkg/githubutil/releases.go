@@ -8,6 +8,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/google/go-github/github"
+	"github.com/upfluence/pkg/log"
 	"golang.org/x/oauth2"
 
 	"github.com/upfluence/ubuild/pkg/version"
@@ -15,9 +16,9 @@ import (
 
 const maxReleases = 30
 
-func GetLatestTag(ctx context.Context, repo string) (string, error) {
+func GetLatestTags(ctx context.Context, repo string) ([]string, error) {
 	var (
-		tag          = "v0.0.0"
+		tags         = make([]string, 0, maxReleases)
 		client       = buildClient().Repositories
 		splittedRepo = strings.Split(repo, "/")
 		rls, _, err  = client.ListReleases(
@@ -29,34 +30,40 @@ func GetLatestTag(ctx context.Context, repo string) (string, error) {
 	)
 
 	if err != nil {
-		return tag, err
+		return tags, err
 	}
 
 	for _, r := range rls {
-		if strings.Compare(*r.TagName, tag) != 1 {
-			continue
-		}
-
-		tag = *r.TagName
+		tags = append(tags, *r.TagName)
 	}
 
-	return tag, nil
+	return tags, nil
 }
 
 func GetLastVersion(repo string) (*version.Version, error) {
-	t, err := GetLatestTag(context.Background(), repo)
+	var tags, err = GetLatestTags(context.Background(), repo)
 
 	if err != nil {
 		return nil, err
 	}
 
-	ver, err := semver.NewVersion(t)
+	ver, err := tagToVersion("v0.0.0")
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &version.Version{Version: *ver}, err
+	for _, t := range tags {
+		if toCompare, err := tagToVersion(t); err != nil {
+			log.Notice(err)
+
+			continue
+		} else if ver.Compare(toCompare) < 0 {
+			ver = toCompare
+		}
+	}
+
+	return ver, err
 }
 
 func CreateRelease(repo string, sha string, v *version.Version) error {
@@ -147,4 +154,14 @@ func buildClient() *github.Client {
 	tc := oauth2.NewClient(ctx, ts)
 
 	return github.NewClient(tc)
+}
+
+func tagToVersion(tag string) (*version.Version, error) {
+	var sv, err = semver.NewVersion(tag)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &version.Version{Version: *sv}, nil
 }
