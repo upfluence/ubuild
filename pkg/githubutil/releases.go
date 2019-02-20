@@ -13,23 +13,44 @@ import (
 	"github.com/upfluence/ubuild/pkg/version"
 )
 
-func GetLastVersion(repo string) (*version.Version, error) {
-	splittedRepo := strings.Split(repo, "/")
-	r, _, err := buildClient().Repositories.GetLatestRelease(
-		context.Background(),
-		splittedRepo[len(splittedRepo)-2],
-		splittedRepo[len(splittedRepo)-1],
+const maxReleases = 30
+
+func GetLatestTag(ctx context.Context, repo string) (string, error) {
+	var (
+		tag          = "v0.0.0"
+		client       = buildClient().Repositories
+		splittedRepo = strings.Split(repo, "/")
+		rls, _, err  = client.ListReleases(
+			ctx,
+			splittedRepo[len(splittedRepo)-2],
+			splittedRepo[len(splittedRepo)-1],
+			&github.ListOptions{Page: 1, PerPage: maxReleases},
+		)
 	)
 
 	if err != nil {
-		if e, ok := err.(*github.ErrorResponse); ok && e.Response.StatusCode == 404 {
-			return &version.Version{Version: *semver.MustParse("v0.0.0")}, nil
+		return tag, err
+	}
+
+	for _, r := range rls {
+		if strings.Compare(*r.TagName, tag) != 1 {
+			continue
 		}
 
+		tag = *r.TagName
+	}
+
+	return tag, nil
+}
+
+func GetLastVersion(repo string) (*version.Version, error) {
+	t, err := GetLatestTag(context.Background(), repo)
+
+	if err != nil {
 		return nil, err
 	}
 
-	ver, err := semver.NewVersion(*r.TagName)
+	ver, err := semver.NewVersion(t)
 
 	if err != nil {
 		return nil, err
