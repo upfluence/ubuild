@@ -8,6 +8,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/google/go-github/github"
+	"github.com/upfluence/pkg/log"
 	"golang.org/x/oauth2"
 
 	"github.com/upfluence/ubuild/pkg/version"
@@ -54,7 +55,9 @@ func GetLastVersion(repo string) (*version.Version, error) {
 
 	for _, t := range tags {
 		if toCompare, err := tagToVersion(t); err != nil {
-			return nil, err
+			log.Notice(err)
+
+			continue
 		} else if ver.Compare(toCompare) < 0 {
 			ver = toCompare
 		}
