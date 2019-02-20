@@ -32,6 +32,10 @@ func (v *Version) String() string {
 	return fmt.Sprintf("v%s", v.Version.String())
 }
 
+func (v *Version) Compare(v2 *Version) int {
+	return v.Version.Compare(&v2.Version)
+}
+
 func (v *Version) IncMajor() {
 	v.Version = v.Version.IncMajor()
 }
