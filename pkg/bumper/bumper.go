@@ -9,10 +9,13 @@ import (
 	"github.com/upfluence/ubuild/pkg/version"
 )
 
-var defaultBump = map[string]func(*version.Version){
-	"master":  func(v *version.Version) { v.IncPatch() },
-	"staging": func(v *version.Version) { v.IncRC() },
-}
+var (
+	branchBumpFns = map[string]func(*version.Version){
+		"master": func(v *version.Version) { v.IncPatch() },
+	}
+
+	defaultBumpFn = func(v *version.Version) { v.IncRC() }
+)
 
 func Bump(ctx *context.Context, cfg *config.Configuration) (*version.Version, error) {
 	v, err := githubutil.GetLastVersion(cfg.GetRepo())
@@ -33,9 +36,10 @@ func Bump(ctx *context.Context, cfg *config.Configuration) (*version.Version, er
 
 	if !version.IncrementVersionFromCommits(v, messages) {
 		log.Notice(ctx.Version.Branch)
-		if fn, ok := defaultBump[ctx.Version.Branch]; ok {
+		if fn, ok := branchBumpFns[ctx.Version.Branch]; ok {
 			fn(v)
-			log.Notice(v)
+		} else {
+			defaultBumpFn(v)
 		}
 	}
 
