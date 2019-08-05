@@ -36,10 +36,11 @@ func TestCompare(t *testing.T) {
 		to   string
 		out  int
 	}{
-		{from: "v0.0.0", to: "v0.0.0-rc1", out: 1},
+		{from: "v0.0.0", to: "v0.0.0-rc1", out: -1},
 		{from: "v1.0.0", to: "v1.0.1-rc1", out: -1},
 		{from: "v1.0.1-rc2", to: "v1.0.1-rc1", out: 1},
 		{from: "v1.0.1-rc1", to: "v1.0.1-rc2", out: -1},
+		{from: "v1.0.1-rc9", to: "v1.0.1-rc10", out: -1},
 		{from: "v1.0.0", to: "v1.0.0", out: 0},
 	} {
 		from, errf := semver.NewVersion(tCase.from)
@@ -57,7 +58,13 @@ func TestCompare(t *testing.T) {
 		vt := &Version{Version: *to}
 
 		if res := r.Compare(vt); res != tCase.out {
-			t.Errorf("Wrong compare: %v instead of: %v", res, tCase.out)
+			t.Errorf(
+				"Wrong compare [from: %q to %q]: %v instead of: %v",
+				tCase.from,
+				tCase.to,
+				res,
+				tCase.out,
+			)
 		}
 	}
 }
