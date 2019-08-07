@@ -35,6 +35,10 @@ func (v *Version) String() string {
 func (v *Version) Compare(v2 *Version) int {
 	if v.Major() == v2.Major() && v.Minor() == v2.Minor() &&
 		v.Patch() == v2.Patch() && v.RC() != v2.RC() {
+		if v2.RC() == 0 {
+			return -1
+		}
+
 		return int(v.RC() - v2.RC())
 	}
 

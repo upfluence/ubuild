@@ -6,6 +6,29 @@ import (
 	"github.com/Masterminds/semver"
 )
 
+func TestIncPatch(t *testing.T) {
+	for _, tCase := range []struct {
+		in  string
+		out string
+	}{
+		{in: "v0.0.0", out: "v0.0.1"},
+		{in: "v1.0.0-rc1", out: "v1.0.0"},
+	} {
+		v, err := semver.NewVersion(tCase.in)
+
+		if err != nil {
+			t.Errorf("Can't parse: %v: %v", tCase.in, err)
+		}
+
+		r := &Version{Version: *v}
+		r.IncPatch()
+
+		if res := r.String(); res != tCase.out {
+			t.Errorf("Wrong version computed: %v instead of: %v", res, tCase.out)
+		}
+	}
+}
+
 func TestIncRC(t *testing.T) {
 	for _, tCase := range []struct {
 		in  string
@@ -41,6 +64,7 @@ func TestCompare(t *testing.T) {
 		{from: "v1.0.1-rc2", to: "v1.0.1-rc1", out: 1},
 		{from: "v1.0.1-rc1", to: "v1.0.1-rc2", out: -1},
 		{from: "v1.0.1-rc9", to: "v1.0.1-rc10", out: -1},
+		{from: "v1.0.1-rc1", to: "v1.0.1", out: -1},
 		{from: "v1.0.0", to: "v1.0.0", out: 0},
 	} {
 		from, errf := semver.NewVersion(tCase.from)
