@@ -1,6 +1,13 @@
 # ubuild
 
-Ubuild is our docker image builder utilities. It packs several tools and workflow that we use through most of our projects. Ubuild objective is two fold, build the docker image and push it to docker hub.
+ubuild is our release tool. It allows you to:
+
+    Generate a release
+    Compile programs
+    Build containers
+    Push those containers to a remote registry
+
+Everything in one command.
 
 ## Install
 
@@ -41,13 +48,13 @@ For example this configuration will build an image based on a python package, up
 ```yaml
 type: py
 verbose: true
-repository: <org>/<repositoryW
+repository: <org>/<repository>
 docker:
   image: "<image_name>"
 ```
 
 ## Circle CI
-To use ubuild with circle-ci you must use the golang primary image have run go get  in a step of you job. The sensitive environment variable should be set in the project settings.
+To use ubuild with circle-ci you must use the golang primary image have run go get  in a step of you job. The sensitive environment variable should be fetched from the project settings.
 
 Example:    - run: docker images
 
