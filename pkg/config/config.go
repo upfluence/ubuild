@@ -1,13 +1,16 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/upfluence/pkg/cfg"
 	"github.com/upfluence/pkg/log"
+	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -194,9 +197,22 @@ func (d Docker) GetImage() string {
 type Deployer struct {
 	URL  string            `yaml:"url"`
 	Envs map[string]string `yaml:"envs"`
+
+	AccessToken string `yaml:"access_token"`
 }
 
-func (d Deployer) GetEnv(branch string) string {
+func (d *Deployer) Client() *http.Client {
+	if d.AccessToken == "" {
+		return http.DefaultClient
+	}
+
+	return oauth2.NewClient(
+		context.Background(),
+		oauth2.StaticTokenSource(&oauth2.Token{AccessToken: d.AccessToken}),
+	)
+}
+
+func (d *Deployer) GetEnv(branch string) string {
 	if t, ok := d.Envs[branch]; ok {
 		return t
 	}

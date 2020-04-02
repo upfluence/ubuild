@@ -57,7 +57,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := d.Client().Do(req)
 
 	if err != nil {
 		return err
