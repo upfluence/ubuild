@@ -3,6 +3,7 @@ package docker
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/upfluence/ubuild/pkg/config"
@@ -75,14 +76,22 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 }
 
 func buildArgs(ctx *context.Context) []string {
-	var res []string
+	var (
+		res []string
 
-	for k, v := range map[string]string{
-		"GIT_BRANCH":     ctx.Version.Branch,
-		"GIT_COMMIT":     ctx.Version.Commit,
-		"GIT_REMOTE":     ctx.Version.Remote,
-		"SEMVER_VERSION": ctx.Version.Semver,
-	} {
+		args = map[string]string{
+			"GIT_BRANCH":     ctx.Version.Branch,
+			"GIT_COMMIT":     ctx.Version.Commit,
+			"GIT_REMOTE":     ctx.Version.Remote,
+			"SEMVER_VERSION": ctx.Version.Semver,
+		}
+	)
+
+	if t := os.Getenv("GITHUB_TOKEN"); t != "" {
+		args["GITHUB_TOKEN"] = t
+	}
+
+	for k, v := range args {
 		res = append(res, "--build-arg", fmt.Sprintf("%s=%s", k, v))
 	}
 
