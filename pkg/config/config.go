@@ -160,10 +160,41 @@ func (c Compiler) GetDist() string {
 	return defaultDist
 }
 
+type BuildArg struct {
+	Provider string `yaml:"provider"`
+	Value    string `yaml:"value"`
+}
+
 type Docker struct {
-	Dockerfile string            `yaml:"dockerfile"`
-	Image      string            `yaml:"image"`
-	Tags       map[string]string `yaml:"tags"`
+	Dockerfile string              `yaml:"dockerfile"`
+	Image      string              `yaml:"image"`
+	Tags       map[string]string   `yaml:"tags"`
+	BuildArgs  map[string]BuildArg `yaml:"build_args"`
+}
+
+func (d Docker) GetBuildArgs() map[string]string {
+	res := make(map[string]string)
+
+	for k, ba := range d.BuildArgs {
+		switch ba.Provider {
+		case "static":
+			res[k] = ba.Value
+		case "env":
+			v := ba.Value
+
+			if v == "" {
+				v = k
+			}
+
+			res[k] = os.Getenv(v)
+		}
+	}
+
+	if _, ok := res["GITHUB_TOKEN"]; !ok && os.Getenv("GITHUB_TOKEN") != "" {
+		res["GITHUB_TOKEN"] = os.Getenv("GITHUB_TOKEN")
+	}
+
+	return res
 }
 
 func (d Docker) GetTag(branch string) string {

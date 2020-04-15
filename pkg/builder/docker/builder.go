@@ -3,7 +3,6 @@ package docker
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/upfluence/ubuild/pkg/config"
@@ -38,7 +37,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 
 	args := append(
 		[]string{"build"},
-		buildArgs(ctx)...,
+		buildArgs(ctx, cfg.Docker)...,
 	)
 
 	args = append(
@@ -75,7 +74,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 	)
 }
 
-func buildArgs(ctx *context.Context) []string {
+func buildArgs(ctx *context.Context, d *config.Docker) []string {
 	var (
 		res []string
 
@@ -87,8 +86,10 @@ func buildArgs(ctx *context.Context) []string {
 		}
 	)
 
-	if t := os.Getenv("GITHUB_TOKEN"); t != "" {
-		args["GITHUB_TOKEN"] = t
+	for k, v := range d.GetBuildArgs() {
+		if v != "" {
+			args[k] = v
+		}
 	}
 
 	for k, v := range args {
