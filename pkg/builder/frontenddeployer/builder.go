@@ -21,6 +21,10 @@ type callbackData struct {
 }
 
 func Build(ctx *context.Context, cfg *config.Configuration) error {
+	if !ctx.Dist {
+		return nil
+	}
+
 	var (
 		d = cfg.GetDeployer()
 		u = d.URL

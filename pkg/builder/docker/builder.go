@@ -35,16 +35,21 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		}
 	}
 
+	tag := "local"
 	args := append(
 		[]string{"build"},
 		buildArgs(ctx, cfg.Docker)...,
 	)
 
+	if ctx.Dist {
+		tag = ctx.Version.Commit[:7]
+	}
+
 	args = append(
 		args,
 		"--no-cache",
 		"-t",
-		cfg.GetBuilder().GetImage()+":"+ctx.Version.Commit[:7],
+		cfg.GetBuilder().GetImage()+":"+tag,
 		cfg.GetPath(),
 	)
 
@@ -54,6 +59,10 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		args...,
 	); err != nil {
 		return err
+	}
+
+	if !ctx.Dist {
+		return nil
 	}
 
 	if err := tagImage(cfg, ctx.Version.Commit[:7], ctx.Version.Semver); err != nil {
