@@ -20,16 +20,14 @@ func Compile(ctx *context.Context, cfg *config.Configuration) error {
 		return err
 	}
 
-	if ctx.Dist {
-		for k, v := range map[string]string{
-			"CGO_ENABLED": cfg.GetCompiler().GetCGO(),
-			"GOOS":        "linux",
-			"GOARCH":      "amd64",
-		} {
-			os.Setenv(k, v)
+	for k, v := range map[string]string{
+		"CGO_ENABLED": cfg.GetCompiler().GetCGO(),
+		"GOOS":        "linux",
+		"GOARCH":      "amd64",
+	} {
+		os.Setenv(k, v)
 
-			defer os.Unsetenv(k)
-		}
+		defer os.Unsetenv(k)
 	}
 
 	for _, binary := range cfg.GetCompiler().Binaries {
