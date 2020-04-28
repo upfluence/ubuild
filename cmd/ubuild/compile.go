@@ -62,10 +62,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if ctx.Dist {
-		if err := builder.Build(ctx, cfg); err != nil {
-			log.Fatal(err)
-		}
+	if err := builder.Build(ctx, cfg); err != nil {
+		log.Fatal(err)
 	}
 
 	log.Notice("Success")
