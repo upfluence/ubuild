@@ -43,7 +43,7 @@ func Compile(ctx *context.Context, cfg *config.Configuration) error {
 
 func buildCommand(ctx *context.Context, binary config.Binary, cfg *config.Configuration) []string {
 	ldFlagFunc := func(k, v string) string {
-		return fmt.Sprintf("-X %s/vendor/%s.%s=%s", cfg.GetRepo(), handlerPkg, k, v)
+		return fmt.Sprintf("-X %s.%s=%s", handlerPkg, k, v)
 	}
 
 	ldFlags := []string{
