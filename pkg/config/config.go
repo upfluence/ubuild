@@ -21,6 +21,7 @@ const (
 	Ruby     BuildType = "rb"
 	Frontend BuildType = "frontend"
 	Python   BuildType = "py"
+	Node     BuildType = "node"
 
 	defaultDist = "dist"
 )
