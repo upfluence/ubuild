@@ -79,6 +79,7 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 		cfg.GetVerbose(),
 		"docker",
 		"push",
+		"-a",
 		cfg.GetBuilder().GetImage(),
 	)
 }
