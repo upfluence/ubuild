@@ -1,6 +1,8 @@
 package bumper
 
 import (
+	"errors"
+
 	"github.com/upfluence/pkg/log"
 
 	"github.com/upfluence/ubuild/pkg/config"
@@ -15,9 +17,28 @@ var (
 	}
 
 	defaultBumpFn = func(v *version.Version) { v.IncRC() }
+
+	bumpStrategies = map[string]func(*version.Version){
+		"bump_patch": func(v *version.Version) { v.IncPatch() },
+		"bump_rc":    func(v *version.Version) { v.IncRC() },
+	}
+
+	errBumpStrategiesNotFound = errors.New("bump strategies not found")
 )
 
 func Bump(ctx *context.Context, cfg *config.Configuration) (*version.Version, error) {
+	v, err := bumpVersion(ctx, cfg)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Notice(v)
+
+	return v, githubutil.CreateRelease(cfg.GetRepo(), ctx.Version.Commit, v)
+}
+
+func bumpVersion(ctx *context.Context, cfg *config.Configuration) (*version.Version, error) {
 	v, err := githubutil.GetLastVersion(cfg.GetRepo())
 
 	if err != nil {
@@ -34,16 +55,25 @@ func Bump(ctx *context.Context, cfg *config.Configuration) (*version.Version, er
 		return nil, err
 	}
 
-	if !version.IncrementVersionFromCommits(v, messages) {
-		log.Notice(ctx.Version.Branch)
-		if fn, ok := branchBumpFns[ctx.Version.Branch]; ok {
+	if version.IncrementVersionFromCommits(v, messages) {
+		return v, nil
+	}
+
+	if st, ok := cfg.CustomBumpStrategies[ctx.Version.Branch]; ok {
+		if fn, ok := bumpStrategies[st]; ok {
 			fn(v)
+			return v, nil
 		} else {
-			defaultBumpFn(v)
+			return nil, errBumpStrategiesNotFound
 		}
 	}
 
-	log.Notice(v)
+	log.Notice(ctx.Version.Branch)
+	if fn, ok := branchBumpFns[ctx.Version.Branch]; ok {
+		fn(v)
+	} else {
+		defaultBumpFn(v)
+	}
 
-	return v, githubutil.CreateRelease(cfg.GetRepo(), ctx.Version.Commit, v)
+	return v, nil
 }
