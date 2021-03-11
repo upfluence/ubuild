@@ -48,7 +48,7 @@ type Configuration struct {
 	Docker   *Docker   `yaml:"docker,omitempty"`
 	Deployer *Deployer `yaml:"deployer,omitempty"`
 
-	CustomBumpStrategies map[string]string `yaml:"custom_bump_strategies,omitempty"`
+	BumpStrategies map[string]string `yaml:"bump_strategies,omitempty"`
 }
 
 func (c Configuration) GetRepo() string {
