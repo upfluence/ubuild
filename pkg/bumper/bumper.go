@@ -59,7 +59,7 @@ func bumpVersion(ctx *context.Context, cfg *config.Configuration) (*version.Vers
 		return v, nil
 	}
 
-	if st, ok := cfg.CustomBumpStrategies[ctx.Version.Branch]; ok {
+	if st, ok := cfg.BumpStrategies[ctx.Version.Branch]; ok {
 		if fn, ok := bumpStrategies[st]; ok {
 			fn(v)
 			return v, nil
