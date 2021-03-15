@@ -42,6 +42,8 @@ deployer:
   envs:
     key: val
     ...
+bump_strategies:
+   <branch>: <strategy> # valid strategies are "bump_patch", "bump_rc"
 ```
 
 For example this configuration will build an image based on a python package, update the release of upfluence/ner_analyser and update to the docker image named "ner-analyser".
@@ -53,30 +55,36 @@ docker:
   image: "<image_name>"
 ```
 
-## Circle CI
-To use ubuild with circle-ci you must use the golang primary image have run go get  in a step of you job. The sensitive environment variable should be fetched from the project settings.
+## Github Action
+
+The sensitive environment variable should be fetched from the project secrets.
 
 Example:    - run: docker images
 
 ```yaml
-publish:
-  docker:
-    - image: circleci/golang:1.13
+build:
+  name: Build
 
-  environment:
-    RELEASE: true
+  runs-on: ubuntu-latest
+
+  needs: test
 
   steps:
-    - checkout
+    - name: Checkout
+      uses: actions/checkout@v2
 
-    - setup_remote_docker
-    - run:
-        command: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
+    - name: Install ubuild
+      run: |
+        curl -sSL https://github.com/upfluence/ubuild/releases/download/v0.2.0/ubuild-linux-amd64-0.2.0 > ~/go/bin/ubuild
+        chmod +x ~/go/bin/ubuild
 
-    - run: go get github.com/upfluence/ubuild/cmd/ubuild
-
-    - run:
-        name: Building server image
-        command: ubuild
+    - name: Build
+      run: |
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        ubuild
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        RELEASE: true
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 ```
