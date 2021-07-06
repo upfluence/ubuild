@@ -1,16 +1,13 @@
 package config
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"strings"
 
 	"github.com/upfluence/pkg/cfg"
 	"github.com/upfluence/pkg/log"
-	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,11 +28,6 @@ var (
 		"master":  "latest",
 		"staging": "staging",
 	}
-
-	defaultEnvs = map[string]string{
-		"master":  "production",
-		"staging": "staging",
-	}
 )
 
 type Configuration struct {
@@ -45,8 +37,7 @@ type Configuration struct {
 
 	Compiler *Compiler `yaml:"compiler,omitempty"`
 
-	Docker   *Docker   `yaml:"docker,omitempty"`
-	Deployer *Deployer `yaml:"deployer,omitempty"`
+	Docker *Docker `yaml:"docker,omitempty"`
 
 	BumpStrategies map[string]string `yaml:"bump_strategies,omitempty"`
 }
@@ -107,14 +98,6 @@ func (c Configuration) GetBuilder() Docker {
 	}
 
 	return Docker{}
-}
-
-func (c Configuration) GetDeployer() Deployer {
-	if c.Deployer != nil {
-		return *c.Deployer
-	}
-
-	return Deployer{}
 }
 
 type Binary struct {
@@ -226,32 +209,6 @@ func (d Docker) GetImage() string {
 	}
 
 	return fmt.Sprintf("upfluence/%s", d.Image)
-}
-
-type Deployer struct {
-	URL  string            `yaml:"url"`
-	Envs map[string]string `yaml:"envs"`
-
-	AccessToken string `yaml:"access_token"`
-}
-
-func (d *Deployer) Client() *http.Client {
-	if d.AccessToken == "" {
-		return http.DefaultClient
-	}
-
-	return oauth2.NewClient(
-		context.Background(),
-		oauth2.StaticTokenSource(&oauth2.Token{AccessToken: d.AccessToken}),
-	)
-}
-
-func (d *Deployer) GetEnv(branch string) string {
-	if t, ok := d.Envs[branch]; ok {
-		return t
-	}
-
-	return defaultEnvs[branch]
 }
 
 func ParseFile(path string) (*Configuration, error) {
