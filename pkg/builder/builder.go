@@ -14,6 +14,8 @@ func Build(ctx *context.Context, cfg *config.Configuration) error {
 	switch cfg.Type {
 	case config.Go, config.Ruby, config.Python, config.Node:
 		return docker.Build(ctx, cfg)
+	case config.Frontend:
+		return nil
 	}
 
 	return errNotImplemented
