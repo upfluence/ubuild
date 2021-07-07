@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -v
+
+version=$1
+
+git tag v$version
+git push --tag
+
+GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build \
+  -o ubuild-linux-amd64-$version \
+  github.com/upfluence/ubuild/cmd/ubuild
+
+GOOS=darwin CGO_ENABLED=0 GOARCH=amd64 go build \
+  -o ubuild-darwin-amd64-$version \
+  github.com/upfluence/ubuild/cmd/ubuild
+
+hub release create \
+  -a ubuild-linux-amd64-$version \
+  -a ubuild-darwin-amd64-$version \
+  -m v$version v$version
+
+rm ubuild-*
